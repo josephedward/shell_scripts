@@ -5,7 +5,6 @@ IFS="
 SPLIT=($RAW)
 # echo ${SPLIT[0]}
 arrVar=()
-
 for i in ${SPLIT[@]};
 do 
 IFS=" "
@@ -17,29 +16,22 @@ IFS="="
 sReq=($request)
 rId=${sReq[1]}
 # echo $rId
-
 fwd=${sLine[10]}
 sFwd=($fwd)
 fIp=${sFwd[1]}
 # echo $fIp
-
-
-echo $fIp
 if [[ $fIp == \"MASKED\" ]] 
 then
 # echo stuff  
 symbol=${fIp/MASKED/[M]}
 symbol=${symbol%\"}
-symbol=${symbol#\"}
-echo $symbol
+symbol=" "${symbol#\"}
+# echo $symbol
 fi
-
-
-arrVar+=($rId' '$symbol)
-echo "
-" 
+arrVar+=($rId$symbol)
+# echo "
+# " 
 done
-
 for x in ${arrVar[@]};
 do
 echo $x
