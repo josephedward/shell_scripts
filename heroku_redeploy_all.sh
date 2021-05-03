@@ -1,5 +1,5 @@
-# heroku login 
-# heroku plugins:install heroku-releases-retry
+heroku login 
+heroku plugins:install heroku-releases-retry
 apps=$(heroku apps) 
 IFS=" "
 apps1=($apps)

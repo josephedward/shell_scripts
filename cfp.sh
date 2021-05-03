@@ -1,3 +1,3 @@
-sudo chown -R dev $1
-sudo chgrp -R dev $1
-sudo chmod -R 777 $1
+sudo chown -R $1 $2
+sudo chgrp -R $1 $2
+sudo chmod -R 777 $2
