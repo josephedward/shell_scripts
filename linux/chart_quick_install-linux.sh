@@ -13,7 +13,10 @@ echo \
   "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt-get install docker docker-engine docker.io containerd runc
-docker run hello-world #verifies progress
+sudo groupadd docker
+sudo usermod -aG docker ${USER}
+# su -s ${USER}
+docker run hello-world 
 # install k3d- unsafe
 curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 # in case it doesn't take
