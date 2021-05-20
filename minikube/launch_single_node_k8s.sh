@@ -10,4 +10,5 @@ export PORT=$(kubectl get svc first-deployment -o go-template='{{range.spec.port
 echo "Accessing host01:$PORT"
 curl host01:$PORT
 minikube addons enable dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
 minikube dashboard --url
