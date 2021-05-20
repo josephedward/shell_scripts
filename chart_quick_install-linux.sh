@@ -23,6 +23,7 @@ curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 echo 'K3D_HOME=/home/linuxbrew/.linuxbrew/Cellar/k3d/4.4.3'>> .bashrc
 echo 'PATH=$PATH:$K3D_HOME/bin'>> .bashrc
 k3d cluster create mycluster
+# writes to kubeconfig
 k3d kubeconfig merge mycluster --kubeconfig-switch-context
 # verify
 kubectl get nodes
