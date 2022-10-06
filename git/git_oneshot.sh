@@ -1,1 +1,1 @@
-git pull --all -f -f && git add . && git commit -m "commit" && git push -f origin master
+git pull --all -f -f && git add . && git commit -m "commit" && git push -f origin master || git push -f origin main
