@@ -1,5 +1,6 @@
+rm ./autobot.yml
+touch .github/workflows/autobot.yml
 cd .github/workflows/
-touch autobot.yml
 echo 'name: Dependabot auto-merge-dependabot-pr
 on:
   pull_request_target
