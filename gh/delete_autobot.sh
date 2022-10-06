@@ -1,0 +1,1 @@
+rm autobot.yml
