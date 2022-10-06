@@ -6,7 +6,7 @@ on:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.actor == "dependabot[bot]"
+    if: github.actor == '\''dependabot[bot]'\''
     steps:
     - name: 'Auto approve PR by Dependabot'
       uses: hmarr/auto-approve-action@v2.0.0
@@ -23,3 +23,4 @@ jobs:
             issue_number: context.issue.number,
             body: '@dependabot squash and merge'
           }) ' > autobot.yml
+
