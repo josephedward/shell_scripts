@@ -12,3 +12,6 @@ update_configs:
   - package_manager: "docker"
     directory: "/"
     update_schedule: "weekly"" > dependabot.yml
+
+
+
