@@ -1,0 +1,38 @@
+{
+    "Budgets": [
+        {
+            "CalculatedSpend": {
+                "ForecastedSpend": {
+                    "Amount": "1.00",
+                    "Unit": "USD"
+                },
+                "ActualSpend": {
+                    "Amount": "1.00",
+                    "Unit": "USD"
+                }
+            },
+            "BudgetType": "COST",
+            "BudgetLimit": {
+                "Amount": "1",
+                "Unit": "USD"
+            },
+            "BudgetName": "1$ Budget",
+            "CostTypes": {
+                "IncludeOtherSubscription": true,
+                "IncludeUpfront": true,
+                "IncludeRefund": true,
+                "UseBlended": false,
+                "IncludeDiscount": true,
+                "UseAmortized": false,
+                "IncludeTax": true,
+                "IncludeCredit": true,
+                "IncludeSupport": true,
+                "IncludeRecurring": true,
+                "IncludeSubscription": true
+            },
+            "TimeUnit": "DAILY",
+            "TimePeriod": {},
+            "CostFilters": {}
+        }
+    ]
+ }
