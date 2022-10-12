@@ -1,0 +1,1 @@
+aws iam get-user --user-name $1 --query 'User.Arn' 

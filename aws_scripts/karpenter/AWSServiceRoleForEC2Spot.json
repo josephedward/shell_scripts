@@ -1,0 +1,25 @@
+{
+    "Role": {
+        "Path": "/aws-service-role/spot.amazonaws.com/",
+        "RoleName": "AWSServiceRoleForEC2Spot",
+        "RoleId": "AROAVBK6PK2SEID4TIRSN",
+        "Arn": "arn:aws:iam::346479875748:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot",
+        "CreateDate": "2022-03-06T20:26:38+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": [
+                        "sts:AssumeRole"
+                    ],
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": [
+                            "spot.amazonaws.com"
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

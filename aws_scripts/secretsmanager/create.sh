@@ -1,0 +1,1 @@
+ aws secretsmanager create-secret --name "$1" --description "$2" --secret-string "$3"
