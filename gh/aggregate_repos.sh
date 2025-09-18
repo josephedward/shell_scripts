@@ -16,7 +16,7 @@ set -euo pipefail
 #   scripts/aggregate_repos.sh [options] <repo-url> [<repo-url> ...]
 #
 # Options:
-#   -p, --prefix <prefix>       Branch name prefix (default: "import/")
+#   -p, --prefix <prefix>       Branch name prefix (default: none)
 #   -n, --no-overwrite          Do not move existing branches (skip if exists)
 #   -d, --depth <n>             Shallow history depth (omit for full history)
 #       --dry-run               Show actions without making changes
@@ -26,7 +26,7 @@ set -euo pipefail
 # - You must be authenticated with `gh auth login -w` (web) or equivalent.
 # - Works with https:// and git@github.com: URL forms, with or without .git.
 
-PREFIX="import/"
+PREFIX=""
 NO_OVERWRITE=false
 DEPTH=""
 DRY_RUN=false
@@ -87,6 +87,28 @@ default_branch_for() {
   gh api "/repos/${owner_repo}" --jq .default_branch 2>/dev/null || return 1
 }
 
+# Check if a remote has a given branch
+remote_has_branch() {
+  local url="$1" branch="$2"
+  # Query the specific ref and verify exact match; handle spaces or tabs
+  if git ls-remote --heads "$url" "refs/heads/${branch}" 2>/dev/null | grep -qE "[[:space:]]refs/heads/${branch}$"; then
+    return 0
+  fi
+  # Some servers also match without the fully qualified input
+  if git ls-remote --heads "$url" "$branch" 2>/dev/null | grep -qE "[[:space:]]refs/heads/${branch}$"; then
+    return 0
+  fi
+  return 1
+}
+
+# Resolve the branch that remote HEAD points to, e.g., main/master
+remote_head_branch() {
+  local url="$1"
+  # Output example: "ref: refs/heads/main\tHEAD" OR with spaces
+  git ls-remote --symref "$url" HEAD 2>/dev/null \
+    | awk '/^ref: refs\/heads\// {ref=$2; sub(/^refs\/heads\//, "", ref); print ref; exit}'
+}
+
 ensure_in_git_repo() {
   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Run inside a git repository"
 }
@@ -96,8 +118,7 @@ branch_exists() {
 }
 
 fetch_into_branch() {
-  local url="$1" src_ref="$2" dest_branch="$3" depth_flag=()
-  if [[ -n "$DEPTH" ]]; then depth_flag=("--depth" "$DEPTH"); fi
+  local url="$1" src_ref="$2" dest_branch="$3"
   # Use a force update on the destination branch unless NO_OVERWRITE=true
   local refspec
   if [[ "$NO_OVERWRITE" == true ]]; then
@@ -106,9 +127,17 @@ fetch_into_branch() {
     refspec="+refs/heads/${src_ref}:refs/heads/${dest_branch}"
   fi
   if [[ "$DRY_RUN" == true ]]; then
-    echo "[dry-run] git fetch ${depth_flag[*]} --no-tags --quiet $url $refspec"
+    if [[ -n "$DEPTH" ]]; then
+      echo "[dry-run] git fetch --depth $DEPTH --no-tags --quiet $url $refspec"
+    else
+      echo "[dry-run] git fetch --no-tags --quiet $url $refspec"
+    fi
   else
-    git fetch ${depth_flag[*]} --no-tags --quiet "$url" "$refspec"
+    if [[ -n "$DEPTH" ]]; then
+      git fetch --depth "$DEPTH" --no-tags --quiet "$url" "$refspec"
+    else
+      git fetch --no-tags --quiet "$url" "$refspec"
+    fi
   fi
 }
 
@@ -140,9 +169,31 @@ main() {
     target_branch="${PREFIX}${repo_name}"
 
     local def_branch
-    if ! def_branch="$(default_branch_for "$owner_repo")"; then
-      die "Failed to resolve default branch for $owner_repo"
+    # 1) Ask GitHub API for default branch
+    if ! def_branch="$(default_branch_for "$owner_repo")" || [[ -z "$def_branch" ]]; then
+      def_branch=""
     fi
+
+    # 2) Validate the branch against the remote; if not present, try fallbacks
+    if [[ -z "$def_branch" ]] || ! remote_has_branch "$url" "$def_branch"; then
+      local head_branch
+      head_branch="$(remote_head_branch "$url" || true)"
+      if [[ -n "$head_branch" ]] && remote_has_branch "$url" "$head_branch"; then
+        echo "- Note: Using remote HEAD branch '${head_branch}'"
+        def_branch="$head_branch"
+      else
+        # 3) Try common branch names as a last resort
+        for candidate in main master trunk; do
+          if remote_has_branch "$url" "$candidate"; then
+            echo "- Note: Falling back to branch '${candidate}'"
+            def_branch="$candidate"
+            break
+          fi
+        done
+      fi
+    fi
+
+    [[ -n "$def_branch" ]] || die "Failed to resolve a valid default branch for $owner_repo"
 
     if [[ "$NO_OVERWRITE" == true ]] && branch_exists "$target_branch"; then
       echo "- Skipping existing branch: $target_branch"
@@ -153,9 +204,12 @@ main() {
     fetch_into_branch "$url" "$def_branch" "$target_branch"
   done
 
-  echo "Done. Created/updated branches with prefix '${PREFIX}'."
+  if [[ -n "$PREFIX" ]]; then
+    echo "Done. Created/updated branches with prefix '${PREFIX}'."
+  else
+    echo "Done. Created/updated branches."
+  fi
 }
 
 parse_args "$@"
 main
-
